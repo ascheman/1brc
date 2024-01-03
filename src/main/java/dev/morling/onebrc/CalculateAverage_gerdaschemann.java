@@ -52,7 +52,7 @@ public class CalculateAverage_gerdaschemann {
         }
 
         public String toString() {
-            return round(min) + "/" + round(sum / count) + "/" + round(max);
+            return STR."\{round(min)}/\{round(sum / count)}/\{round(max)}";
         }
 
         private double round(double value) {
@@ -171,7 +171,7 @@ public class CalculateAverage_gerdaschemann {
                         // newLines++;
                     }
                     else if (data[index] == '\0') {
-                        throw new RuntimeException("This should never happen: Data should not contain 0 bytes");
+                        throw new RuntimeException("This should never happen: Data should not contain null bytes");
                     }
                     index++;
                 }
@@ -180,7 +180,6 @@ public class CalculateAverage_gerdaschemann {
             }
         }
 
-        // private static int BLOCKSIZE = Integer.MAX_VALUE - 5;
         List<Block> blocks;
         final int noOfThreads = Runtime.getRuntime().availableProcessors();
         Result result = new Result();
