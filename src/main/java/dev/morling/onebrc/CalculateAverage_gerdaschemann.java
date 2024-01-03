@@ -61,7 +61,7 @@ public class CalculateAverage_gerdaschemann {
     }
 
     static class Result {
-        Map<String, Measurement> result = new HashMap<>();
+        Map<String, Measurement> map = new HashMap<>();
 
         Result() {
         }
@@ -73,20 +73,20 @@ public class CalculateAverage_gerdaschemann {
         // }
 
         void merge(final String key, final Measurement toMerge) {
-            Measurement value = result.get(key);
+            Measurement value = map.get(key);
             if (null != value) {
-                result.put(key, Measurement.combineWith(value, toMerge));
+                map.put(key, Measurement.combineWith(value, toMerge));
             }
             else {
-                result.put(key, toMerge);
+                map.put(key, toMerge);
             }
         }
 
         void merge(final Result toMerge) {
             // debug("Merging in %d results from block #%d",
             // toMerge.result.keySet().size(), toMerge.blockNo);
-            for (String key : toMerge.result.keySet()) {
-                merge(key, toMerge.result.get(key));
+            for (String key : toMerge.map.keySet()) {
+                merge(key, toMerge.map.get(key));
             }
         }
     }
@@ -239,7 +239,7 @@ public class CalculateAverage_gerdaschemann {
 
         void print(PrintStream out) {
             out.print("{");
-            out.print(result.result.entrySet().stream().sorted(Map.Entry.comparingByKey()).map(Object::toString).collect(Collectors.joining(", ")));
+            out.print(result.map.entrySet().stream().sorted(Map.Entry.comparingByKey()).map(Object::toString).collect(Collectors.joining(", ")));
             out.println("}");
         }
     }
