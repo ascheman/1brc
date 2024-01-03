@@ -100,11 +100,20 @@ public class CalculateAverage_gerdaschemann {
 
             int blockNo;
             long lastIndex;
+            long startPosition;
+            RandomAccessFile file;
 
-            Block(final int blockNo, final int blockSize) {
+            Block(final int blockNo, final int blockSize, final RandomAccessFile file) {
                 data = new byte[blockSize];
                 lastIndex = blockSize - 1;
                 this.blockNo = blockNo;
+                this.startPosition = blockNo * (long) blockSize;
+                this.file = file;
+            }
+
+            void read() throws Exception {
+                file.seek(startPosition);
+                lastIndex = file.read(data);
             }
 
             void prepend(final Block previousBlock) {
@@ -188,24 +197,18 @@ public class CalculateAverage_gerdaschemann {
                 blocks = new ArrayList<>(noOfThreads);
                 // debug("File '%s' has length = %d bytes (= %d blocks of size %d)",
                 // FILE, fileLength, noOfThreads, blockSize);
-                Block previousBlock = null;
-                int blockNo = 0;
-                for (long startPosition = 0; startPosition < fileLength; startPosition += blockSize) {
-                    file.seek(startPosition);
-                    Block block = new Block(blockNo++, blockSize);
-                    block.lastIndex = file.read(block.data);
+                for (int blockNo = 0; blockNo < noOfThreads; blockNo++) {
+                    Block block = new Block(blockNo, blockSize, file);
                     blocks.add(block);
-                    if (null != previousBlock && previousBlock.data[blockSize - 1] != '\n') {
-                        block.prepend(previousBlock);
-                    }
-                    previousBlock = block;
-                    // debug("Start of Block (#%d): '%s'",
-                    // block.blockNo, new String(block.data, 0, 5));
-                    // debug("End of Block (#%d): '%s'",
-                    // block.blockNo, new String(block.data, (int) readBytes - 5, 5));
-                    // debug("Read another %010d bytes (%010d total) / %010d bytes", readBytes, startPosition + readBytes, fileLength);
+                    block.read();
                 }
-                assert (noOfThreads == blocks.size());
+
+                for (int blockNo = 1; blockNo < noOfThreads; blockNo++) {
+                    Block previousBlock = blocks.get(blockNo - 1);
+                    if (previousBlock.data[blockSize - 1] != '\n') {
+                        blocks.get(blockNo).prepend(previousBlock);
+                    }
+                }
             }
         }
 
