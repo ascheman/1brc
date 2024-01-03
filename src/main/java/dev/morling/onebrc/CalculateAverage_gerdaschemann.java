@@ -193,14 +193,9 @@ public class CalculateAverage_gerdaschemann {
             try (RandomAccessFile file = new RandomAccessFile(FILE, "r")) {
                 long fileLength = file.length();
                 int blockSize = (int) (fileLength / noOfThreads) + 1;
-                blocks = new ArrayList<>(noOfThreads);
                 // debug("File '%s' has length = %d bytes (= %d blocks of size %d)",
                 // FILE, fileLength, noOfThreads, blockSize);
-                for (int blockNo = 0; blockNo < noOfThreads; blockNo++) {
-                    Block block = new Block(blockNo, blockSize, file);
-                    blocks.add(block);
-                    block.read();
-                }
+                blocks = readBlocks(file, blockSize);
 
                 for (int blockNo = 1; blockNo < noOfThreads; blockNo++) {
                     Block previousBlock = blocks.get(blockNo - 1);
@@ -209,6 +204,18 @@ public class CalculateAverage_gerdaschemann {
                     }
                 }
             }
+        }
+
+        private List<Block> readBlocks(final RandomAccessFile file, final int blockSize)
+                throws Exception {
+            List<Block> result = new ArrayList<>(noOfThreads);
+            for (int blockNo = 0; blockNo < noOfThreads; blockNo++) {
+                Block block = new Block(blockNo, blockSize, file);
+                result.add(block);
+                block.read();
+            }
+
+            return result;
         }
 
         void count() throws Exception {
