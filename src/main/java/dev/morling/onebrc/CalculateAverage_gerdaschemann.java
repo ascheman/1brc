@@ -218,22 +218,28 @@ public class CalculateAverage_gerdaschemann {
             return result;
         }
 
+        List<Result> blockResults;
+
         void count() throws Exception {
             try (ExecutorService executorService = Executors.newFixedThreadPool(noOfThreads)) {
-                List<Callable<Result>> taskList = new ArrayList<>();
+                List<Callable<Result>> taskList = new ArrayList<>(noOfThreads);
                 for (int blockNo = 0; blockNo < noOfThreads; blockNo++) {
                     final int finalBlockNo = blockNo;
                     taskList.add(() -> blocks.get(finalBlockNo).count());
                 }
 
                 List<Future<Result>> resultList = executorService.invokeAll(taskList);
-                // int total = 0;
+                blockResults = new ArrayList<>(noOfThreads);
                 for (Future<Result> future : resultList) {
-                    // total += future.get(); // will wait if not ready yet
-                    result.merge(future.get());
+                    blockResults.add(future.get());
                 }
-                // debug("Found #%d newLines / semicolons", total);
                 executorService.shutdown();
+            }
+        }
+
+        void merge() {
+            for (Result blockResult : blockResults) {
+                result.merge(blockResult);
             }
         }
 
@@ -252,6 +258,9 @@ public class CalculateAverage_gerdaschemann {
         before = System.currentTimeMillis();
         ba.count();
         debug("Counting took: %d ms", System.currentTimeMillis() - before);
+        before = System.currentTimeMillis();
+        ba.merge();
+        debug("Merging took: %d ms", System.currentTimeMillis() - before);
         before = System.currentTimeMillis();
         ba.print(System.out);
         debug("Printing took: %d ms", System.currentTimeMillis() - before);
