@@ -46,3 +46,7 @@ out/
 /measurements*.txt
 /*.out
 out_expected.txt
+
+# 1BRC test-unique output
+/logs
+/results
